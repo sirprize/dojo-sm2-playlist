@@ -13,7 +13,7 @@ define([
         
         id: null,
         
-        constructor: function (options) {
+        constructor: function (trackInfo, soundOptions) {
             var self = this, i = 0;
             
             var events = [
@@ -32,30 +32,33 @@ define([
                 'whileplaying'
             ];
             
+            lang.mixin(this, trackInfo);
+            
             for (i = 0; i < events.length; i += 1) {
-                options[events[i]] = (function (ev) {
+                soundOptions[events[i]] = (function (ev) {
                     return function () {
                         self.emit(ev, { track: self });
                     }
                 }(events[i]));
             }
             
-            this.id = options.id;
-            soundManager.createSound(options);
+            this.id = soundOptions.id;
+            soundManager.createSound(soundOptions);
         }
     });
     
     return declare([], {
         
         tracks: [],
-        current: -1,
+        currentIndex: -1,
         
         onready: function () {
             soundManager.onready.apply(soundManager, arguments);
         },
         
-        addTrack: function (options) {
-            this.tracks.push(new Track(options));
+        addTrack: function (trackInfo, soundOptions) {
+            this.tracks.push(new Track(trackInfo, soundOptions));
+            this.currentIndex = (this.currentIndex < 0) ? 0 : this.currentIndex;
         },
         
         getTrack: function (idx) {
@@ -67,34 +70,27 @@ define([
         },
         
         play: function () {
-            var sound;
-            
-            if (this.tracks.length < 1) {
-                return;
-            }
-            
-            this.current = (this.current < 0) ? 0 : this.current;
-            sound = this.getCurrentSound();
-            
-            if (!sound) {
-                return;
-            }
-            
-            if (!this.isPlaying()) {
-                sound.play();
-            }
+            if (!this.tracks.length) { return; }
+            this.getCurrentSound().play();
+        },
+        
+        previous: function () {
+            if (!this.tracks.length) { return; }
+            this.getCurrentSound().stop();
+            this.currentIndex = (this.currentIndex === 0) ? this.tracks.length - 1 : this.currentIndex - 1;
+            this.getCurrentSound().play();
+        },
+        
+        next: function () {
+            if (!this.tracks.length) { return; }
+            this.getCurrentSound().stop();
+            this.currentIndex = (this.currentIndex === this.tracks.length - 1) ? 0 : this.currentIndex + 1;
+            this.getCurrentSound().play();
         },
         
         pause: function () {
-            var sound = this.getCurrentSound();
-            
-            if (!sound) {
-                return;
-            }
-            
-            if (this.isPlaying()) {
-                sound.pause();
-            }
+            if (!this.tracks.length) { return; }
+            this.getCurrentSound().pause();
         },
         
         isPlaying: function () {
@@ -103,8 +99,13 @@ define([
         },
         
         getCurrentSound: function () {
-            var track = this.getTrack(this.current);
-            return (track) ? soundManager.getSoundById(track.id) : undefined;
+            if (!this.tracks.length) { return null; }
+            return soundManager.getSoundById(this.getCurrentTrack().id);
+        },
+        
+        getCurrentTrack: function () {
+            if (!this.tracks.length) { return null; }
+            return this.getTrack(this.currentIndex);
         }
     });
 });
