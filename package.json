@@ -1,0 +1,6 @@
+{
+    "name": "dojo-sm2-playlist",
+    "description": "Playlist based on Soundmanager2 for Dojo applications",
+    "version": 0.1,
+    "dojoBuild": "package.js"
+}
