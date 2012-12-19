@@ -50,7 +50,7 @@ define([
     return declare([], {
         
         tracks: [],
-        currentIndex: -1,
+        index: -1,
         
         onready: function () {
             soundManager.onready.apply(soundManager, arguments);
@@ -58,7 +58,7 @@ define([
         
         addTrack: function (trackInfo, soundOptions) {
             this.tracks.push(new Track(trackInfo, soundOptions));
-            this.currentIndex = (this.currentIndex < 0) ? 0 : this.currentIndex;
+            this.index = (this.index < 0) ? 0 : this.index;
         },
         
         getTrack: function (idx) {
@@ -77,14 +77,14 @@ define([
         previous: function () {
             if (!this.tracks.length) { return; }
             this.getCurrentSound().stop();
-            this.currentIndex = (this.currentIndex === 0) ? this.tracks.length - 1 : this.currentIndex - 1;
+            this.index = (this.index === 0) ? this.tracks.length - 1 : this.index - 1;
             this.getCurrentSound().play();
         },
         
         next: function () {
             if (!this.tracks.length) { return; }
             this.getCurrentSound().stop();
-            this.currentIndex = (this.currentIndex === this.tracks.length - 1) ? 0 : this.currentIndex + 1;
+            this.index = (this.index === this.tracks.length - 1) ? 0 : this.index + 1;
             this.getCurrentSound().play();
         },
         
@@ -99,13 +99,13 @@ define([
         },
         
         getCurrentSound: function () {
-            if (!this.tracks.length) { return null; }
+            if (!this.tracks.length) { return; }
             return soundManager.getSoundById(this.getCurrentTrack().id);
         },
         
         getCurrentTrack: function () {
-            if (!this.tracks.length) { return null; }
-            return this.getTrack(this.currentIndex);
+            if (!this.tracks.length) { return; }
+            return this.getTrack(this.index);
         }
     });
 });
