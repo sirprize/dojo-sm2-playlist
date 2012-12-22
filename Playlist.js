@@ -106,6 +106,11 @@ define([
         getCurrentTrack: function () {
             if (!this.tracks.length) { return; }
             return this.getTrack(this.index);
+        },
+        
+        getCurrentPosition: function () {
+            if (!this.tracks.length) { return; }
+            return this.index + 1;
         }
     });
 });
